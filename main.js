@@ -342,6 +342,7 @@ class GameHelp {
       return `${time}`;
     };
   }
+  // Youtube duration can be 1 second less or more than what is asked for
   async getYoutubeLink(duration) {
     const res = await fetch(
       "https://raw.githubusercontent.com/RoadRunnerNick/The-password-game-cheats/main/data.json"
