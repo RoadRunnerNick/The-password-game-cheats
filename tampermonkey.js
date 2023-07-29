@@ -346,7 +346,7 @@ class GameHelp {
   }
   async getYoutubeLink(duration) {
     const res = await fetch(
-      "https://raw.githubusercontent.com/RoadRunnerNick/Passwordgamecheats/main/data.json"
+      "https://raw.githubusercontent.com/RoadRunnerNick/The-password-game-cheats/main/data.json"
     );
     const data = await res.text();
     return JSON.parse(data)[duration] || "No link found for that duration";

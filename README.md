@@ -1,9 +1,9 @@
-An easy to use interface for making [Neal's password game](https://neal.fun/password-game/) a lot easier and less tedious to play
+An easy to use Javascript interface for making [Neal's password game](https://neal.fun/password-game/) a lot easier and less tedious to play
 
 # Useful Features
 
 - Finding the country from the geoguesser
-- Solving chess puzzle
+- Automatically solve chess puzzle
 - Automatically finds the wordle answer
 - Unlock rules up to certain rule number
 - Automatically complete all unlocked rules
