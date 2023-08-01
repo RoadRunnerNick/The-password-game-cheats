@@ -3,6 +3,9 @@ function isVowel(char) {
     char
   );
 }
+function isDigit(char) {
+  return /^\d$/.test(char);
+}
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -24,27 +27,34 @@ class GameHelp {
     ]["matched"][0]["instances"].default["_scope"]["effects"][0]["deps"][0][
       "subs"
     ]["2"]["deps"][14]["subs"][0]["vm"];
-    this.utils = Object.values(document.querySelector("#__nuxt"))[0]["_scope"][
-      "effects"
-    ][3]["deps"][0]["subs"][1]["vm"]["_scope"]["effects"][0]["deps"][1][
-      "subs"
-    ][0]["vm"]["$options"]["parent"]["$store"]["$router"]["history"]["current"][
-      "matched"
-    ][0]["instances"].default;
   }
   get currentCaptcha() {
     return this._gameOpts.currCaptcha;
   }
+
   set currentCaptcha(val) {
     this._gameOpts.currCaptcha = val;
   }
   refreshCaptcha() {
     this._gameOpts.refreshCaptcha();
   }
-
+  refreshRules() {
+    let passBox = document.querySelector(".password-box .ProseMirror p");
+    if (!passBox) {
+      document
+        .querySelector(".password-box .ProseMirror p")
+        .insertAdjacentHTML(
+          "beforeend",
+          '<span style="font-family: Monospace; font-size: 28px">ddd</span>'
+        );
+      passBox = document.querySelector(".password-box span");
+    }
+    passBox.textContent = passBox.textContent + "";
+  }
   get geoloc() {
     return this._gameOpts.currPlace.title;
   }
+  // Only if he hasn't hatched yet
   stopPaulEating() {
     this._gameOpts.eatBug = function () {};
     this._gameOpts.paulHatched = false;
@@ -131,10 +141,6 @@ class GameHelp {
       "ffeeuwowofpqwpefmemfii2ff1f93030--a[=[q[['''``[1212o",
       "ifmimi398329q-wpsd'dw'dpp3k4nnfnsc sjkkxssiduu3i47eujdusiso",
     ];
-  }
-  get finalPasswordText() {
-    return this._gameOpts.finalPasswordDoc.content.content[0].content.content[0]
-      .text;
   }
   getMoonPhases() {
     return "🌑 🌒 🌓 🌔 🌕 🌖 🌗 🌘 🌑";
@@ -229,13 +235,14 @@ class GameHelp {
           }
         }, 5);
       } else {
-        return "Chess board not visible";
+        resolve("Chess board not visible");
       }
     });
   }
   get normalPassword() {
     return this._gameOpts.password;
   }
+
   // 🐔  🐛
   feedPaul() {
     this.paulTimer = setInterval(
@@ -257,6 +264,7 @@ class GameHelp {
             (char) => char === "🐔"
           );
           if (food >= 3) return;
+
           const text2 = currLine.textContent.splice(index + 2, 0, "🐛");
           document.querySelectorAll(".password-box .ProseMirror p")[
             lineIndex
@@ -303,32 +311,36 @@ class GameHelp {
     });
   }
   squareFontSizes() {
-    const nodes = [...document.querySelectorAll(".ProseMirror p")]
-      .map((el) => {
-        return el.childNodes;
-      })
-      .map((el) => Array.from(el))
-      .flat(10)
-      .map((el) => (el.childNodes.length > 0 ? el.childNodes : el))
-      .map((el) => (el.nodeName ? el : Array.from(el)))
-      .flat(10);
-    for (const node of nodes) {
-      for (const [i, t] of [...node.textContent].entries()) {
-        if (isFinite(t)) {
-          const style = node.style;
-          const size = node.parentNode.style.fontSize.slice(0, 2);
-          if (Number(t) * Number(t) !== Number(size)) {
-            const newEl = document.createElement("span");
-            newEl.textContent = t;
+    const container = document.querySelector(".ProseMirror");
+    const paragraphs = container.querySelectorAll("p");
 
-            node.parentNode.parentNode.insertBefore(newEl, node.parentNode);
-            node.textContent = node.textContent.slice(i + 1);
-            newEl.style = style;
-            newEl.style.fontSize = `${Number(t) * Number(t)}px`;
+    paragraphs.forEach((paragraph) => {
+      const textNodes = paragraph.childNodes;
+
+      textNodes.forEach((node) => {
+        const textContent = node.textContent;
+        const wrapper = document.createElement("span");
+
+        for (let i = 0; i < textContent.length; i++) {
+          const char = textContent.charAt(i);
+
+          if (isDigit(char)) {
+            const digitSize = Math.pow(parseInt(char), 2); // Calculate the square of the digit
+            const digitElement = document.createElement("span");
+            digitElement.style.fontSize = `${digitSize}px`; // Set the font size to the square value
+            digitElement.textContent = char;
+            wrapper.appendChild(digitElement);
+          } else {
+            const textNode = document.createTextNode(char);
+            wrapper.appendChild(textNode);
           }
         }
-      }
-    }
+
+        paragraph.replaceChild(wrapper, node);
+      });
+    });
+    this._gameOpts.showFontSize = true;
+    document.querySelectorAll("select")[0].value = "28px";
   }
   get currentTime() {
     return new Date()
@@ -344,6 +356,7 @@ class GameHelp {
       return `${time}`;
     };
   }
+  // Youtube duration can be 1 second less or more than what is asked for
   async getYoutubeLink(duration) {
     const res = await fetch(
       "https://raw.githubusercontent.com/RoadRunnerNick/The-password-game-cheats/main/data.json"
